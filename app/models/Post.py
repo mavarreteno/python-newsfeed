@@ -16,5 +16,6 @@ class Post(Base):
   comments = relationship('Comment', cascade='all,delete')
   votes = relationship('Vote', backref='post', lazy='dynamic', cascade='all,delete')
   vote_count = column_property(
+    # the lesson included square brackets around the func.count(Vote.id) but this broke my code
     select(func.count(Vote.id)).where(Vote.post_id == id)
   )
