@@ -1,6 +1,6 @@
 import sys
 from flask import Blueprint, request, jsonify, session
-from app.models import User , Post, Comment, Vote
+from app.models import User, Post, Comment, Vote
 from app.db import get_db
 from app.utils.auth import login_required
 
@@ -12,30 +12,26 @@ def signup():
   db = get_db()
 
   try:
-    #create a new user
+    # attempt creating a new user
     newUser = User(
       username = data['username'],
       email = data['email'],
       password = data['password']
     )
 
-    # save in database
     db.add(newUser)
     db.commit()
+
   except:
     print(sys.exc_info()[0])
 
-    # insert failed, so rollback
+    # insert failed, so rollback and send error to front end
     db.rollback()
-
-    # insert failed, so send error to front end
     return jsonify(message = 'Signup failed'), 500
-
 
   session.clear()
   session['user_id'] = newUser.id
-  session['loggedIn'] = True
-
+  session['logged'] = True
 
   return jsonify(id = newUser.id)
 
@@ -65,7 +61,7 @@ def login():
 
   return jsonify(id = user.id)
 
-@bp.route('comments', methods=['POST'])
+@bp.route('/comments', methods=['POST'])
 @login_required
 def comment():
   data = request.get_json()
@@ -83,11 +79,11 @@ def comment():
     db.commit()
   except:
     print(sys.exc_info()[0])
-    
+
     db.rollback()
     return jsonify(message = 'Comment failed'), 500
-  return jsonify(id = newComment.id)
 
+  return jsonify(id = newComment.id)
 
 @bp.route('/posts/upvote', methods=['PUT'])
 @login_required
@@ -136,7 +132,6 @@ def create():
 
   return jsonify(id = newPost.id)
 
-
 @bp.route('/posts/<id>', methods=['PUT'])
 @login_required
 def update(id):
@@ -144,7 +139,7 @@ def update(id):
   db = get_db()
 
   try:
-    #retrieve post and update title property
+    # retrieve post and update title property
     post = db.query(Post).filter(Post.id == id).one()
     post.title = data['title']
     db.commit()

@@ -30,4 +30,4 @@ class User(Base):
     return bcrypt.checkpw(
       password.encode('utf-8'),
       self.password.encode('utf-8')
-    )
+  )
